@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>scheduler</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      
+      #todo-container {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+      }
+      
+      #todo-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      #todo-list li {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      #todo-list li input[type="checkbox"] {
+        margin-right: 10px;
+      }
+      
+      #add-todo-form {
+        display: flex;
+        margin-top: 20px;
+      }
+      
+      #new-todo {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      
+      #add-todo-form button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      
+      #add-todo-form button:hover {
+        background-color: #3e8e41;
+      }
+      
+      #todo-list li.completed {
+        text-decoration: line-through;
+        color: #aaa;
+      }
+      
+  </style>
+</head>
+<body>
+  <h1>Task-scheduler</h1>
+  <div id="todo-container">
+    <ul id="todo-list"></ul>
+    <form id="add-todo-form">
+      <input type="text" id="new-todo" placeholder="Add a new task">
+      <button type="submit">Add</button>
+    </form>
+  </div>
+  <script>
+
+    const todoList = document.getElementById('todo-list');
+const todoForm = document.getElementById('add-todo-form');
+const newTodoInput = document.getElementById('new-todo');
+
+todoForm.addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevent default form submission
+
+  const newTodoValue = newTodoInput.value.trim();
+
+  if (newTodoValue) {
+    // Create a new todo list item
+    const todoItem = document.createElement('li');
+    todoItem.classList.add('todo-item');
+
+    // Create a checkbox for the todo item
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.addEventListener('change', function() {
+      todoItem.classList.toggle('completed');
+      saveTodos(); // Update local storage when checkbox changes
+    });
+
+    // Create a label for the todo item
+    const label = document.createElement('label');
+    label.textContent = newTodoValue;
+
+    // Create a delete button for the todo item
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.addEventListener('click', function() {
+      todoList.removeChild(todoItem);
+      saveTodos(); // Update local storage when todo is deleted
+    });
+
+    // Append elements to the list item
+    todoItem.appendChild(checkbox);
+    todoItem.appendChild(label);
+    todoItem.appendChild(deleteButton);
+
+    // Add the todo item to the list
+    todoList.appendChild(todoItem);
+
+    // Clear the input field
+    newTodoInput.value = '';
+
+    // Save the new todo to local storage
+    saveTodos();
+  }
+});
+
+// Load any existing todos from local storage
+const savedTodos = localStorage.getItem('todos');
+if (savedTodos) {
+  const parsedTodos = JSON.parse(savedTodos);
+  parsedTodos.forEach(todo => {
+    // Create a new todo item based on the saved data
+    const todoItem = document.createElement('li');
+    todoItem.classList.add('todo-item');
+    todoItem.innerHTML = `
+      <input type="checkbox" ${todo.completed ? 'checked' : ''}>
+      <label>${todo.text}</label>
+      <button>X</button>
+    `;
+
+    // Add event listeners for checkbox and delete button
+    todoItem.querySelector('input').addEventListener('change', function() {
+      todoItem.classList.toggle('completed');
+      saveTodos(); // Update local storage when checkbox changes
+    });
+    todoItem.querySelector('button').addEventListener('click', function() {
+      todoList.removeChild(todoItem);
+      saveTodos(); // Update local storage when todo is deleted
+    });
+
+    // Add the loaded todo item to the list
+    todoList.appendChild(todoItem);
+  });
+}
+
+// Function to save todos to local storage
+function saveTodos() {
+  const todoItems = todoList.querySelectorAll('.todo-item');
+  const todos = [];
+  todoItems.forEach(item => {
+    todos.push({
+      text: item.querySelector('label').textContent,
+      completed: item.querySelector('input').checked
+    });
+  });
+  localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+    
+  
+  </script>
+</body>
+</html>
